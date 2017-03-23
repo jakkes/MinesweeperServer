@@ -8,12 +8,13 @@ namespace MinesweeperServer
     public class Node : Position
     {
         public StatusType Status { get; set; } = StatusType.Hidden;
-        public NodeType Type { get; private set; }
+        public NodeType Type { get; internal set; }
 
         public Node(int X, int Y, NodeType Type) : base(X,Y)
         {
             this.Type = Type;
         }
+        public Node(Position pos, NodeType Type) : this(pos.X,pos.Y, Type) {}
 
 
         public enum NodeType

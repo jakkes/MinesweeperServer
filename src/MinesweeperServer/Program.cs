@@ -13,14 +13,19 @@ namespace MinesweeperServer
             WebSocketServer srv = new WebSocketServer(PORT);
             srv.ClientConnected += Srv_ClientConnected;
 
+            try{
             srv.Start();
             Console.WriteLine("Started server on port " + PORT);
-	    Console.ReadLine();
+	        Console.ReadLine();
+            }
+            catch (Exception){
+                Console.WriteLine("Failed to start server.");
+            }
         }
 
         private static void Srv_ClientConnected(WebSocketServer source, Connection conn)
         {
-            throw new NotImplementedException();
+            new Client(conn);
         }
     }
 }

@@ -22,11 +22,13 @@ namespace MinesweeperServer
         private Settings _settings;
         private Node[][] _board;
         private HashSet<Node> _bombs;
+        private Random _r = new Random();
         public Game(Settings settings)
         {
             if (settings.Bombs > settings.Width * settings.Height)
                 throw new ArgumentException("Too many bombs.");
             _settings = settings;
+            _populateBoard();
         }
         public void Reveal(int X, int Y)
         {
@@ -74,18 +76,46 @@ namespace MinesweeperServer
         }
         private void _populateBoard()
         {
-            throw new NotImplementedException();
-            Random _r = new Random();
+            List<Position> freeLocations = new List<Position>(_settings.Width * _settings.Height);
+            _board = new Node[_settings.Width][];
+            for(int i = 0; i < _board.Length;i++){
+                _board[i] = new Node[_settings.Height];
+                for(int j = 0; j < _settings.Height; j++)
+                    freeLocations.Add(new Position(i,j));
+            }
             _bombs = new HashSet<Node>();
-            _board = new Node[Width][];
-            for (int i = 0; i < Width; i++)
-                _board[i] = new Node[Height];
+            while (_bombs.Count<_settings.Bombs){
+                int i = _r.Next(freeLocations.Count);
+                Position pos = freeLocations[i];
+                freeLocations.RemoveAt(i);
+                Node bomb = new Node(pos,Node.NodeType.Bomb);
+                _board[pos.X][pos.Y] = bomb;
+                _bombs.Add(bomb);
+            }
+            foreach(var pos in freeLocations){
+                _board[pos.X][pos.Y] = new Node(pos,Node.NodeType.Empty);
+            }
+            foreach(var bomb in _bombs){
 
-            Queue<int> bombPos = new Queue<int>();
-            for (int n = 0; n < _settings.Bombs; n++)
-                bombPos.Enqueue(_r.Next(_settings.Height * _settings.Width - n));
-
-            int j = bombPos.Peek();
+                if(bomb.X > 0){
+                    _board[bomb.X - 1][bomb.Y].Type++;
+                    if(bomb.Y > 0)
+                        _board[bomb.X-1][bomb.Y-1].Type++;
+                    if(bomb.Y < _settings.Height-1)
+                        _board[bomb.X - 1][bomb.Y+1].Type++;
+                }
+                if(bomb.X < _settings.Width-1){
+                    _board[bomb.X + 1][bomb.Y].Type++;
+                    if(bomb.Y > 0)
+                        _board[bomb.X + 1][bomb.Y - 1].Type++;
+                    if(bomb.Y < _settings.Height-1)
+                        _board[bomb.X + 1][bomb.Y + 1].Type++;
+                }
+                if(bomb.Y > 0)
+                    _board[bomb.X][bomb.Y - 1].Type++;
+                if(bomb.Y < _settings.Height - 1)
+                    _board[bomb.X][bomb.Y + 1].Type++;
+            }
         }
     }
 }
