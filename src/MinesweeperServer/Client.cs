@@ -1,8 +1,6 @@
 ﻿using Jakkes.WebSockets.Server;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using MinesweeperServer.Models;
+using Newtonsoft.Json;
 
 namespace MinesweeperServer
 {
@@ -17,7 +15,15 @@ namespace MinesweeperServer
 
         private void Conn_MessageReceived(Connection source, string data)
         {
-            
+            RequestModel m = JsonConvert.DeserializeObject<RequestModel>(data);
+            switch(m.Action){
+                case "NewGame":
+                    StartNewGame(JsonConvert.DeserializeObject<NewGameRequestModel>(data));
+                    break;
+            }
+        }
+        private  void StartNewGame(NewGameRequestModel model){
+
         }
     }
 }

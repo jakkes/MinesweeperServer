@@ -15,6 +15,7 @@ namespace MinesweeperServer
 
             srv.Start();
             Console.WriteLine("Started server on port " + PORT);
+	    Console.ReadLine();
         }
 
         private static void Srv_ClientConnected(WebSocketServer source, Connection conn)
