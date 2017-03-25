@@ -48,23 +48,30 @@ namespace MinesweeperServer
             List<Position> cleared = new List<Position>();
             HashSet<Node> visited = new HashSet<Node>();
             Queue<Node> _nodesToCheck = new Queue<Node>();
-            visited.Add(node);
-            cleared.Add(node);
+            _nodesToCheck.Enqueue(node);
             while(_nodesToCheck.Count > 0)
             {
                 var n = _nodesToCheck.Dequeue();
                 visited.Add(n);
+                n.Status = Node.StatusType.Revealed;
+                cleared.Add(n);
                 if(n.Type == Node.NodeType.Empty)
                 {
-                    n.Status = Node.StatusType.Revealed;
-                    cleared.Add(n);
-                    if (n.X - 1 >= 0 && !visited.Contains(_board[n.X + 1][n.Y + 1]))
-                        _nodesToCheck.Enqueue(_board[n.X + 1][n.Y + 1]);
+                    if (n.X > 0 && !visited.Contains(_board[n.X - 1][n.Y]))
+                        _nodesToCheck.Enqueue(_board[n.X - 1][n.Y]);
+                    if (n.X > 0 && n.Y > 0 && !visited.Contains(_board[n.X-1][n.Y-1]))
+                        _nodesToCheck.Enqueue(_board[n.X-1][n.Y-1]);
+                    if (n.X > 0 && n.Y + 1 < Height && !visited.Contains(_board[n.X-1][n.Y+1]))
+                        _nodesToCheck.Enqueue(_board[n.X-1][n.Y+1]);
                     if (n.X + 1 < Width && !visited.Contains(_board[n.X + 1][n.Y]))
                         _nodesToCheck.Enqueue(_board[n.X + 1][n.Y]);
+                    if (n.X + 1 < Width && n.Y > 0 && !visited.Contains(_board[n.X + 1][n.Y - 1]))
+                        _nodesToCheck.Enqueue(_board[n.X+1][n.Y-1]);
+                    if (n.X + 1 < Width && n.Y + 1 < Height && !visited.Contains(_board[n.X + 1][n.Y + 1]));
+                        _nodesToCheck.Enqueue(_board[n.X + 1][n.Y + 1]);
                     if (n.Y + 1 < Height && !visited.Contains(_board[n.X][n.Y + 1]))
                         _nodesToCheck.Enqueue(_board[n.X][n.Y + 1]);
-                    if (n.Y - 1 >= 0 && !visited.Contains(_board[n.X][n.Y - 1]))
+                    if (n.Y > 0 && !visited.Contains(_board[n.X][n.Y - 1]))
                         _nodesToCheck.Enqueue(_board[n.X][n.Y - 1]);
                 }
             }
@@ -72,7 +79,7 @@ namespace MinesweeperServer
         }
         private void _gameOver(Node node)
         {
-
+            GameOver?.Invoke(this, _board);
         }
         private void _populateBoard()
         {
@@ -98,22 +105,24 @@ namespace MinesweeperServer
             foreach(var bomb in _bombs){
 
                 if(bomb.X > 0){
-                    _board[bomb.X - 1][bomb.Y].Type++;
-                    if(bomb.Y > 0)
+                    if(_board[bomb.X - 1][bomb.Y].Type != Node.NodeType.Bomb)
+                        _board[bomb.X - 1][bomb.Y].Type++;
+                    if(bomb.Y > 0 && _board[bomb.X-1][bomb.Y-1].Type != Node.NodeType.Bomb)
                         _board[bomb.X-1][bomb.Y-1].Type++;
-                    if(bomb.Y < _settings.Height-1)
+                    if(bomb.Y < _settings.Height-1 && _board[bomb.X - 1][bomb.Y+1].Type != Node.NodeType.Bomb)
                         _board[bomb.X - 1][bomb.Y+1].Type++;
                 }
                 if(bomb.X < _settings.Width-1){
-                    _board[bomb.X + 1][bomb.Y].Type++;
-                    if(bomb.Y > 0)
+                    if(_board[bomb.X + 1][bomb.Y].Type != Node.NodeType.Bomb)
+                        _board[bomb.X + 1][bomb.Y].Type++;
+                    if(bomb.Y > 0 && _board[bomb.X + 1][bomb.Y - 1].Type != Node.NodeType.Bomb)
                         _board[bomb.X + 1][bomb.Y - 1].Type++;
-                    if(bomb.Y < _settings.Height-1)
+                    if(bomb.Y < _settings.Height-1 && _board[bomb.X + 1][bomb.Y + 1].Type != Node.NodeType.Bomb)
                         _board[bomb.X + 1][bomb.Y + 1].Type++;
                 }
-                if(bomb.Y > 0)
+                if(bomb.Y > 0 && _board[bomb.X][bomb.Y - 1].Type != Node.NodeType.Bomb)
                     _board[bomb.X][bomb.Y - 1].Type++;
-                if(bomb.Y < _settings.Height - 1)
+                if(bomb.Y < _settings.Height - 1 && _board[bomb.X][bomb.Y + 1].Type != Node.NodeType.Bomb)
                     _board[bomb.X][bomb.Y + 1].Type++;
             }
         }
